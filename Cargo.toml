@@ -1,0 +1,21 @@
+[package]
+name = "xml_c14n"
+version = "0.3.0"
+edition = "2021"
+
+description = "Safe & stupid simple API for XML canonicalization, built on libxml2"
+authors = ["Reinis Mazeiks"]
+
+keywords = ["xml", "libxml", "c14n", "canonicalization"]
+categories = ["api-bindings", "encoding", "web-programming"]
+
+license = "MIT OR Apache-2.0"
+
+repository = "https://gitlab.com/reinis-mazeiks/xml_c14n"
+documentation = "https://docs.rs/xml_c14n/"
+readme = "Readme.md"
+
+[dependencies]
+libxml = "0.3.3"
+
+thiserror = "1.0.50"

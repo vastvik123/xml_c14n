@@ -1,0 +1,9 @@
+stages:
+  - test
+
+rust-latest:
+  stage: test
+  image: rust:latest
+  script:
+    - rustc --version && cargo --version
+    - cargo test --verbose
