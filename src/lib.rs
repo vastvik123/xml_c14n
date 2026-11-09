@@ -1,7 +1,7 @@
 #![doc = include_str!("../Readme.md")]
 
 use libxml::bindings::{
-    xmlC14NDocDumpMemory, xmlChar, xmlDocPtr, xmlFree, xmlFreeDoc, xmlNodeSet, xmlReadDoc,
+    xmlC14NDocDumpMemory, xmlChar, xmlDocPtr, xmlFreeDoc, xmlNodeSet, xmlReadDoc,
 };
 use std::ffi::{c_char, c_int, c_void, CStr, CString};
 use std::iter::once;
@@ -84,8 +84,9 @@ pub fn canonicalize_xml(
             Ok(str_slice.to_owned())
         };
 
-        // let free_function = xmlFree.unwrap();
-        // free_function(output as *mut c_void);
+        // `output` was allocated by libxml2 with malloc; free it with libc::free (xmlFree is a
+        // global function pointer in the bindings and isn't reliable from Rust). free(NULL) is a no-op.
+        libc::free(output as *mut c_void);
 
         xmlFreeDoc(document);
 
