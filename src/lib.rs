@@ -1,12 +1,19 @@
 #![doc = include_str!("../Readme.md")]
 
 use libxml::bindings::{
-    xmlC14NDocDumpMemory, xmlChar, xmlDocPtr, xmlFree, xmlFreeDoc, xmlNodeSet, xmlReadDoc,
+    xmlC14NDocDumpMemory, xmlChar, xmlDocPtr, xmlFreeDoc, xmlFreeFunc, xmlNodeSet, xmlReadDoc,
 };
 use std::ffi::{c_char, c_int, c_void, CStr, CString};
 use std::iter::once;
 use std::ptr::null;
 use thiserror::Error;
+
+extern "C" {
+    // Declared here instead of using `libxml::bindings::xmlFree`: the pre-generated bindings link to
+    // "\u{1}xmlFree", which skips the `_` prefix macOS needs and fails to link there.
+    #[link_name = "xmlFree"]
+    static XML_FREE: xmlFreeFunc;
+}
 
 /// Options for configuring how to canonicalize XML
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
@@ -84,8 +91,10 @@ pub fn canonicalize_xml(
             Ok(str_slice.to_owned())
         };
 
-        // let free_function = xmlFree.unwrap();
-        // free_function(output as *mut c_void);
+        // Free with libxml2's own deallocator so a custom allocator set via xmlMemSetup is respected.
+        if let Some(free) = XML_FREE {
+            free(output as *mut c_void);
+        }
 
         xmlFreeDoc(document);
 
